@@ -1,0 +1,81 @@
+import java.io.*;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class JuegoServlet extends HttpServlet {
+    private static final List<String> jugadores = Arrays.asList("Jugador1", "Jugador2", "Jugador3", "Jugador4");
+
+    // Las 8 palabras de los jugadores inocentes
+    private static final List<String> palabrasInocentes = Arrays.asList(
+        "Streptococcus agalactiae",
+        "Streptococcus epidermidis",
+        "Clostridium difficile",
+        "Chromoagar difficile",
+        "Bacillus cereus",
+        "Clostridium Perfrigens",
+        "Agar lipasa",
+        "Prueba PCR"
+    );
+
+    // Palabra del impostor (puedes cambiarla o añadir más)
+    private static final List<String> palabraImpostor = Arrays.asList(
+        "Palabra del impostor"
+    );
+
+    private static final Random rand = new Random();
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Repartir las tarjetas aleatoriamente entre los jugadores
+        List<String> tarjetas = new ArrayList<>(palabrasInocentes); // Añadir las palabras de los jugadores inocentes
+        tarjetas.add(palabraImpostor.get(0)); // Añadir la palabra del impostor
+
+        Collections.shuffle(tarjetas); // Mezclar las tarjetas
+
+        // Preparar el modelo de datos para enviarlo al frontend
+        Map<String, Object> datosJuego = new HashMap<>();
+        datosJuego.put("jugadores", jugadores);
+        datosJuego.put("tarjetas", tarjetas);
+
+        // Enviar los datos a la página HTML
+        request.setAttribute("datosJuego", datosJuego);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/index.jsp");
+        dispatcher.forward(request, response);
+    }
+}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina el Impostor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .tarjeta { border: 1px solid #333; padding: 20px; margin: 10px; display: inline-block; width: 150px; text-align: center; }
+        .jugador { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Adivina el Impostor</h1>
+    <h2>Tarjetas asignadas:</h2>
+    <div id="tarjetas">
+        <c:forEach var="jugador" items="${datosJuego.jugadores}">
+            <div class="tarjeta">
+                <p class="jugador">${jugador}</p>
+                <ul>
+                    <c:forEach var="palabra" items="${datosJuego.tarjetas}">
+                        <li>${palabra}</li>
+                    </c:forEach>
+                </ul>
+            </div>
+        </c:forEach>
+    </div>
+    <h3>¡Cada jugador debe describir una palabra sin decirla directamente!</h3>
+    <button onclick="adivinarImpostor()">Adivina quién es el impostor</button>
+
+    <script>
+        function adivinarImpostor() {
+            alert("¡Que empiece la ronda! Adivina quién es el impostor.");
+        }
+    </script>
+</body>
+</html>
